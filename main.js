@@ -69,9 +69,9 @@ function createRenderTargets() {
         format: THREE.RGBAFormat,
     });
 
-    // update camera aspect ratio inside renderer based on the actual cols/rows
+    // update camera aspect ratio inside renderer based on the actual window proportions
     if (camera) {
-        camera.aspect = cols / rows; // Viewport aspect ratio matches grid resolution exactly!
+        camera.aspect = (cols * CELL_WIDTH) / (rows * CELL_HEIGHT);
         camera.updateProjectionMatrix();
     }
 }
