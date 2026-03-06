@@ -12,7 +12,8 @@ const ctx = canvas.getContext('2d', { alpha: false });
 
 let scene, camera, renderer, renderTarget;
 let controls;
-let saturnGroup, rings, planet;
+let planetGroup;
+let currentPlanetType = 'saturn';
 let cols, rows;
 
 const lights = [];
@@ -41,7 +42,14 @@ function init() {
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
 
-    buildSaturn();
+    setupLights();
+    buildPlanet(currentPlanetType);
+
+    document.getElementById('btn-earth').addEventListener('click', () => switchPlanet('earth'));
+    document.getElementById('btn-mars').addEventListener('click', () => switchPlanet('mars'));
+    document.getElementById('btn-venus').addEventListener('click', () => switchPlanet('venus'));
+    document.getElementById('btn-saturn').addEventListener('click', () => switchPlanet('saturn'));
+
     createRenderTargets();
 
     const loadEl = document.getElementById('loading');
@@ -68,36 +76,129 @@ function createRenderTargets() {
     }
 }
 
-function buildSaturn() {
-    saturnGroup = new THREE.Group();
-    scene.add(saturnGroup);
+function switchPlanet(type) {
+    if (type === currentPlanetType && isInitialized) return; // Allow initial build even if not initialized
 
-    // Planet with more segments
-    const pGeo = new THREE.SphereGeometry(6, 128, 128);
-    const pMat = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        roughness: 0.7,
-        metalness: 0.1,
-    });
-    planet = new THREE.Mesh(pGeo, pMat);
-    saturnGroup.add(planet);
+    // Update active button
+    document.querySelectorAll('#planet-controls button').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`btn-${type}`).classList.add('active');
 
-    // Rings
-    const rGeo = new THREE.RingGeometry(7.5, 14, 256);
-    const rMat = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.8,
-        roughness: 0.4
-    });
-    rings = new THREE.Mesh(rGeo, rMat);
-    rings.rotation.x = Math.PI / 2;
-    saturnGroup.add(rings);
+    currentPlanetType = type;
 
-    // Axial tilt
-    saturnGroup.rotation.z = 26.7 * (Math.PI / 180);
+    // Remove old planet group
+    if (planetGroup) {
+        scene.remove(planetGroup);
+    }
 
+    buildPlanet(type);
+}
+
+function buildPlanet(type) {
+    planetGroup = new THREE.Group();
+    scene.add(planetGroup);
+
+    let pGeo, pMat, mesh, rGeo, rMat, rings;
+
+    switch (type) {
+        case 'earth':
+            pGeo = new THREE.SphereGeometry(6, 128, 128);
+            pMat = new THREE.MeshStandardMaterial({
+                color: 0x4466ff,
+                roughness: 0.6,
+                metalness: 0.2,
+            });
+            mesh = new THREE.Mesh(pGeo, pMat);
+            planetGroup.add(mesh);
+
+            const mGeo = new THREE.SphereGeometry(1.5, 64, 64);
+            const mMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 });
+            const moon = new THREE.Mesh(mGeo, mMat);
+            moon.position.set(10, 0, 0);
+
+            const moonPivot = new THREE.Group();
+            moonPivot.add(moon);
+            moonPivot.userData.isMoonPivot = true;
+            moonPivot.userData.orbitSpeed = 0.5;
+            planetGroup.add(moonPivot);
+
+            planetGroup.rotation.z = 23.5 * (Math.PI / 180);
+            break;
+
+        case 'mars':
+            pGeo = new THREE.SphereGeometry(4, 128, 128);
+            pMat = new THREE.MeshStandardMaterial({
+                color: 0xff3300,
+                roughness: 0.9,
+                metalness: 0.1,
+            });
+            mesh = new THREE.Mesh(pGeo, pMat);
+            planetGroup.add(mesh);
+
+            const m1Geo = new THREE.SphereGeometry(0.6, 32, 32);
+            const m1Mat = new THREE.MeshStandardMaterial({ color: 0xaa6655, roughness: 1.0 });
+            const m1 = new THREE.Mesh(m1Geo, m1Mat);
+            m1.position.set(6, 0, 0);
+            const p1 = new THREE.Group();
+            p1.add(m1);
+            p1.userData.isMoonPivot = true;
+            p1.userData.orbitSpeed = 1.5;
+            planetGroup.add(p1);
+
+            const m2Geo = new THREE.SphereGeometry(0.4, 32, 32);
+            const m2Mat = new THREE.MeshStandardMaterial({ color: 0x887766, roughness: 1.0 });
+            const m2 = new THREE.Mesh(m2Geo, m2Mat);
+            m2.position.set(8, 0, 0);
+            const p2 = new THREE.Group();
+            p2.add(m2);
+            p2.userData.isMoonPivot = true;
+            p2.userData.orbitSpeed = 0.8;
+            planetGroup.add(p2);
+
+            planetGroup.rotation.z = 25.2 * (Math.PI / 180);
+            break;
+
+        case 'venus':
+            pGeo = new THREE.SphereGeometry(5.8, 128, 128);
+            pMat = new THREE.MeshStandardMaterial({
+                color: 0xffcc77,
+                roughness: 0.3,
+                metalness: 0.1,
+            });
+            mesh = new THREE.Mesh(pGeo, pMat);
+            planetGroup.add(mesh);
+
+            planetGroup.rotation.z = 2.64 * (Math.PI / 180);
+            break;
+
+        case 'saturn':
+        default:
+            pGeo = new THREE.SphereGeometry(6, 128, 128);
+            pMat = new THREE.MeshStandardMaterial({
+                color: 0xffeebb,
+                roughness: 0.7,
+                metalness: 0.1,
+            });
+            mesh = new THREE.Mesh(pGeo, pMat);
+            planetGroup.add(mesh);
+
+            rGeo = new THREE.RingGeometry(7.5, 14, 256);
+            rMat = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.8,
+                roughness: 0.4
+            });
+            rings = new THREE.Mesh(rGeo, rMat);
+            rings.rotation.x = Math.PI / 2;
+            planetGroup.add(rings);
+
+            planetGroup.rotation.z = 26.7 * (Math.PI / 180);
+            break;
+    }
+}
+
+function setupLights() {
     // Ambient light - darker for more contrast
     scene.add(new THREE.AmbientLight(0xffffff, 0.1));
 
@@ -136,12 +237,19 @@ function animate() {
     const time = clock.getElapsedTime();
 
     // Rotate planet slowly
-    if (saturnGroup) {
-        saturnGroup.rotation.y = time * 0.2;
-    }
+    if (planetGroup) {
+        planetGroup.rotation.y = time * 0.2;
 
-    // Gentle floating
-    saturnGroup.position.y = Math.sin(time * 0.5) * 0.5;
+        // Rotate moons independently
+        planetGroup.children.forEach(child => {
+            if (child.userData.isMoonPivot) {
+                child.rotation.y = time * child.userData.orbitSpeed;
+            }
+        });
+
+        // Gentle floating
+        planetGroup.position.y = Math.sin(time * 0.5) * 0.5;
+    }
 
     // Move trippy lights
     lights.forEach((l, i) => {

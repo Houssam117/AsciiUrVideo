@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,9 +17,17 @@
         }
     </script>
 </head>
+
 <body>
     <canvas id="ascii-canvas"></canvas>
+    <div id="planet-controls">
+        <button id="btn-earth">EARTH</button>
+        <button id="btn-mars">MARS</button>
+        <button id="btn-venus">VENUS</button>
+        <button id="btn-saturn" class="active">SATURN</button>
+    </div>
     <div id="loading">Initializing Universe...</div>
     <script type="module" src="main.js"></script>
 </body>
+
 </html>
