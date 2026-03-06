@@ -1,0 +1,30 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+    color: #fff;
+    font-family: monospace;
+}
+
+#ascii-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* No smoothing for clear text */
+    image-rendering: auto; 
+}
+
+#loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    letter-spacing: 2px;
+    pointer-events: none;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    transition: opacity 0.5s ease;
+}
